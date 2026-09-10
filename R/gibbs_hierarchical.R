@@ -93,7 +93,7 @@ Gibbs <- function(n, omega, T0, y_bar, theta0, thetaj, U, W, b, a, m0, k0, y, D,
     #Updating of Thetaj
     for (d in 1:D) {
       An1 <- solve(n * omega + T0)
-      bn <- n * omega %*% thetaj[[D]] + T0 %*% matrix(theta0, ncol = 1)
+      bn <- n * omega %*% thetaj[[d]] + T0 %*% matrix(theta0, ncol = 1)
       thetaJ_post <- rmvnorm(1, An1 %*% bn, An1)
       thetaJ_post = matrix(c(thetaJ_post), nrow=1,byrow = T)
       
@@ -101,7 +101,7 @@ Gibbs <- function(n, omega, T0, y_bar, theta0, thetaj, U, W, b, a, m0, k0, y, D,
     
     
     #Output storage
-    thetaj_post[s,,D]  = thetaJ_post 
+    thetaj_post[s,,d]  = thetaJ_post 
     }
     omega_post[,,s] = omega
     theta0_post[s,] = theta0

@@ -66,7 +66,7 @@ informative priors — the data, not the prior, are driving the result.
 ## Reproducing
 
 ```r
-install.packages(c("MASS", "mvtnorm", "ggplot2", "gridExtra"))
+install.packages(c("MASS", "mvtnorm", "ggplot2", "gridExtra", "patchwork"))
 source("R/gibbs_hierarchical.R")   # ~2000 Gibbs iterations
 ```
 
@@ -90,3 +90,28 @@ attribute other than subtype is present. Rows whose FAB label is blank or outsid
   there is no multiplicity control.
 - Only M0, M1, M2 and M4 survive the missingness filter, so the conclusion says
   nothing about the subtypes that were dropped.
+
+## Note on the committed code
+
+The script as originally written indexed the group loop with the loop *bound*
+rather than the loop *variable*:
+
+```r
+for (d in 1:D) {
+  bn <- n * omega %*% thetaj[[D]] + ...   # D, not d
+  thetaj_post[s, , D] <- thetaJ_post      # D, not d
+}
+```
+
+Every inner iteration therefore updated group 4 and wrote to slice 4, leaving
+slices 1-3 as `NA` -- so the script ran the sampler successfully and then failed
+at the first shrinkage plot with `need finite 'ylim' values`. Both indices are now
+`d`. With the fix the script runs end to end under R 4.3.3, and
+
+```r
+mean(results$thetaj_post[,,1][,4] > results$thetaj_post[,,2][,4])
+## 0.5915
+```
+
+which is the near-coin-flip the report describes: no meaningful difference in BAD
+between M0 and M2. The written conclusions stand; only the code needed correcting.
